@@ -4,13 +4,14 @@ A Python package implementing a variety of document-related tools for converting
 
 ## Setup
 
-```bash
-# Create a virtual env and activate it
-uv venv
-source .venv/bin/activate
+Requires Python 3.10–3.13 (`onnxruntime`, a `markitdown` dependency, has no wheels for newer versions). The `.python-version` file selects 3.13.
 
-# Install the package in development mode
-uv pip install -e .
+```bash
+# Create a virtual env and install the locked dependencies
+uv sync
+
+# Activate it (on Windows: .venv\Scripts\activate)
+source .venv/bin/activate
 ```
 
 ## Running

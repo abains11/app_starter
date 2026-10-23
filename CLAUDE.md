@@ -7,9 +7,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 Uses `uv` for environment and dependency management.
 
 ```bash
-uv venv --python 3.13                  # create venv (see Python version note below)
+uv sync                                # create venv + install locked deps (Python 3.13 via .python-version)
 source .venv/Scripts/activate          # Windows/Git Bash; .venv/bin/activate on Unix
-uv pip install -e .                    # install in dev mode
 uv run main.py                         # start the MCP server (FastMCP, "docs")
 uv run pytest                          # run all tests
 uv run pytest tests/test_document.py::TestBinaryDocumentToMarkdown::test_binary_document_to_markdown_with_pdf   # single test
@@ -17,7 +16,9 @@ uv run pytest tests/test_document.py::TestBinaryDocumentToMarkdown::test_binary_
 
 No linter is configured.
 
-**Python version:** `pyproject.toml` allows `>=3.10`, but Python 3.15 does not work: `markitdown` depends on `magika` -> `onnxruntime`, which has no cp315 wheels. Use 3.10–3.13.
+**Python version:** `pyproject.toml` allows `>=3.10`, but Python 3.15 does not work: `markitdown` depends on `magika` -> `onnxruntime`, which has no cp315 wheels. Use 3.10–3.13; `.python-version` pins 3.13 for uv.
+
+**pydantic is capped `<2.14`** in `pyproject.toml`: 2.14 removed `eval_type_backport`, which the pinned `mcp==1.8.0` imports. Prefer `uv sync` (uses `uv.lock`) over `uv pip install -e .`.
 
 ## Code style
 
@@ -30,7 +31,7 @@ A small MCP server exposing document-processing tools to AI assistants.
 - `main.py` creates the `FastMCP("docs")` server (from `mcp.server.fastmcp`) and registers each tool with `mcp.tool()(fn)`. A new tool must be both implemented in `tools/` and registered here.
 - `tools/` holds plain Python functions, grouped by module; they have no MCP dependency and can be unit-tested directly.
   - `tools/math.py`: `add`, the reference example of a fully documented tool.
-  - `tools/document.py`: `binary_document_to_markdown(binary_data, file_type)` wraps `markitdown` (bytes + file extension such as `"docx"`/`"pdf"` -> markdown text). It is not yet registered in `main.py` and does not yet follow the tool conventions below.
+  - `tools/document.py`: `binary_document_to_markdown(binary_data, file_type)` wraps `markitdown` (bytes + file extension such as `"docx"`/`"pdf"` -> markdown text); it is a helper, not a registered tool. `document_path_to_markdown(file_path)` is the registered tool: it validates the path and `.pdf`/`.docx` extension, reads the file, and delegates to the helper.
 - `tests/test_document.py` tests the document tools against `tests/fixtures/mcp_docs.docx` and `mcp_docs.pdf`.
 
 ## Defining MCP tools

@@ -7,6 +7,6 @@ requires-python = ">=3.10"
 dependencies = [
     "markitdown[docx,pdf]>=0.1.1",
     "mcp[cli]==1.8.0",
-    "pydantic>=2.11.3",
+    "pydantic>=2.11.3,<2.14",  # 2.14 breaks mcp==1.8.0 (eval_type_backport removed)
     "pytest>=8.3.5",
 ]
